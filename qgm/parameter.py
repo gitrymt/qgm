@@ -6,7 +6,6 @@ class system():
         self.set_defaults()
 
         if len(kwargs) > 0:
-            print(kwargs)
             self.set_info(**kwargs)
 
     def set_defaults(self):
@@ -55,14 +54,12 @@ class system():
                     kwargs2 = kwargs[key]
                     for key2 in kwargs2:
                         if key2 in lattice_info:
-                            print(key2)
                             lattice_info[key2] = kwargs2[key2]
                         else:
                             print('KeyError: %s is not found in %s.' % (key2, key))
                     
                     self.info[key] = lattice_info
                 else:
-                    print(key)
                     self.info[key] = kwargs[key]
             else:
                 print('KeyError: %s is not found.' % key)
@@ -161,4 +158,3 @@ class psf():
 
     def get_psf_image(self):
         return self.psf_image
-
