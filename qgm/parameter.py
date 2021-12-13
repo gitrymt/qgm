@@ -109,7 +109,6 @@ class psf():
         self.set_defaults()
         
         if len(kwargs) > 0:
-            print(kwargs)
             self.set_info(**kwargs)
 
     def set_defaults(self):
@@ -129,7 +128,6 @@ class psf():
     def set_info(self, **kwargs):
         for key in kwargs:
             if key in self.info:
-                print(key)
                 self.info[key] = kwargs[key]
             else:
                 print('KeyError: %s is not found.' % key)
