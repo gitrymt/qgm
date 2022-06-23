@@ -20,7 +20,7 @@ class image():
     def __init__(self, image_path=''):
         self.system = system()
         
-        if image_path is not '':
+        if image_path != '':
             try:
                 self.image_path = image_path
                 # print(self.image_path)
@@ -107,64 +107,104 @@ class image():
         return self.xymesh
 
     def generate_lattice_sites(self, Nsite=2*10+1, rxlim=10, rylim=10, unit='um', limits='circle', origin='best'):
-        n = [[i - (Nsite-1)/2] for i in range(Nsite)]
-        n1, n2 = np.meshgrid(n, n)
-        
         info_L1 = self.system.lattice['Lattice 1'].info
         info_L2 = self.system.lattice['Lattice 2'].info
-
+        
         if unit == 'um':
             a1 = info_L1['Constant (um)']
             a2 = info_L2['Constant (um)']
             
-            if origin == 'best':
-                id_orig = np.argmax(self.system.lattice['Origins']['Goodness'])
-
-                x0 = self.system.lattice['Origins']['X Center (um)'][id_orig]
-                y0 = self.system.lattice['Origins']['Y Center (um)'][id_orig]
-            else:
-                if type(origin) == int:
-                    x0 = self.system.lattice['Origins']['X Center (um)'][origin]
-                    y0 = self.system.lattice['Origins']['Y Center (um)'][origin]
-            
+            label_x0 = 'X Center (um)'
+            label_y0 = 'Y Center (um)'
         elif unit == 'px':
             a1 = info_L1['Constant (px)']
             a2 = info_L2['Constant (px)']
 
-            if origin == 'best':
-                id_orig = np.argmax(self.system.lattice['Origins']['Goodness'])
-
-                x0 = self.system.lattice['Origins']['X Center (px)'][id_orig]
-                y0 = self.system.lattice['Origins']['Y Center (px)'][id_orig]
-            else:
-                if type(origin) == int:
-                    x0 = self.system.lattice['Origins']['X Center (px)'][origin]
-                    y0 = self.system.lattice['Origins']['Y Center (px)'][origin]
-
-        # print(x0, y0)
+            label_x0 = 'X Center (px)'
+            label_y0 = 'Y Center (px)'
 
         angle1 = info_L1['Angle (radian)']
         angle2 = info_L2['Angle (radian)']
-
+        
         a1x = a1 * np.cos(angle1)
         a1y = a1 * np.sin(angle1)
         a2x = a2 * np.cos(angle2)
         a2y = a2 * np.sin(angle2)
 
         det = (a1x * a2y - a2x * a1y)
-        n01 = (a2y * x0 - a2x * y0) / det
-        n02 = (-a1y * x0 + a1x * y0) / det
-        
-        x0 = x0 - (n01 * a1x + n02 * a2x)
-        y0 = y0 - (n01 * a1y + n02 * a2y)
 
+        if origin == 'best':
+            id_orig = np.argmax(self.system.lattice['Origins']['Goodness'])
+
+            x0 = self.system.lattice['Origins'][label_x0][id_orig]
+            y0 = self.system.lattice['Origins'][label_y0][id_orig]
+
+            n01 = int((a2y * x0 - a2x * y0) / det)
+            n02 = int((-a1y * x0 + a1x * y0) / det)
+            
+            x0 = x0 - (n01 * a1x + n02 * a2x)
+            y0 = y0 - (n01 * a1y + n02 * a2y)
+        elif origin == 'average':
+            x0s = []
+            y0s = []
+
+            for x0_tmp, y0_tmp in zip(self.system.lattice['Origins'][label_x0], self.system.lattice['Origins'][label_y0]):
+                n01 = int((a2y * x0_tmp - a2x * y0_tmp) / det)
+                n02 = int((-a1y * x0_tmp + a1x * y0_tmp) / det)
+
+                x0s += [x0_tmp - (n01 * a1x + n02 * a2x)]
+                y0s += [y0_tmp - (n01 * a1y + n02 * a2y)]
+
+            x0s = np.array(x0s)
+            y0s = np.array(y0s)
+
+            diff_sites = np.sqrt((x0s - x0s[0])**2 + (y0s - y0s[0])**2)
+            x0s_comp = []
+            y0s_comp = []
+
+            x0s_within = x0s[diff_sites<np.mean([a1,a2])/2]
+            y0s_within = y0s[diff_sites<np.mean([a1,a2])/2]
+
+            x0_comp_origin = np.mean(x0s_within)
+            y0_comp_origin = np.mean(y0s_within)
+
+            n = [-1, 0, 1]
+            n1, n2 = np.meshgrid(n, n)
+
+            for x0_tmp, y0_tmp in zip(x0s[diff_sites>=np.mean([a1,a2])/2], y0s[diff_sites>=np.mean([a1,a2])/2]):
+                x0_recalc = np.reshape(x0_tmp + (n1 * a1x + n2 * a2x), n1.size)
+                y0_recalc = np.reshape(y0_tmp + (n1 * a1y + n2 * a2y), n1.size)
+                diff_center = np.reshape(np.sqrt((x0_recalc - x0_comp_origin)**2 + (y0_recalc - y0_comp_origin)**2), n1.size)
+
+                x0s_comp += [x0_recalc[np.argmin(diff_center)]]
+                y0s_comp += [y0_recalc[np.argmin(diff_center)]]
+
+            x0s = np.append(x0s_within, (np.array(x0s_comp)))
+            y0s = np.append(y0s_within, (np.array(y0s_comp)))
+
+            x0 = np.mean(x0s)
+            y0 = np.mean(y0s)
+        else:
+            if type(origin) == int:
+                x0 = self.system.lattice['Origins'][label_x0][origin]
+                y0 = self.system.lattice['Origins'][label_y0][origin]
+
+                n01 = int((a2y * x0 - a2x * y0) / det)
+                n02 = int((-a1y * x0 + a1x * y0) / det)
+                
+                x0 = x0 - (n01 * a1x + n02 * a2x)
+                y0 = y0 - (n01 * a1y + n02 * a2y)
+
+        n = [[i - (Nsite-1)/2] for i in range(Nsite)]
+        n1, n2 = np.meshgrid(n, n)
+        
         xs_all = n1 * a1 * np.cos(angle1) + n2 * a2 * np.cos(angle2) + x0
         ys_all = n1 * a1 * np.sin(angle1) + n2 * a2 * np.sin(angle2) + y0
 
-        if limits is 'circle':
+        if limits == 'circle':
             xs = xs_all[(xs_all/rxlim)**2 + (ys_all/rylim)**2 < 1]
             ys = ys_all[(xs_all/rxlim)**2 + (ys_all/rylim)**2 < 1]
-        elif limits is 'square':
+        elif limits == 'square':
             xs = xs_all[np.abs(xs_all) <= rxlim]
             ys = ys_all[np.abs(xs_all) <= rxlim]
             xs = xs[np.abs(ys) <= rylim]
