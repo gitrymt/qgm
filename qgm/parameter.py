@@ -18,7 +18,7 @@ class system():
                      'Pre amp.': 3,
                      'HS speed (MHz)': 17.0,
                      'VS speed (us/px)': 3.3,
-                     'Temperatrue': -75,
+                     'Temperature': -75,
                      'Objective NA': 0.65, 
                      'Cloud center (px)': (0, 0), 
                      'Cloud center (um)': (0, 0), 
