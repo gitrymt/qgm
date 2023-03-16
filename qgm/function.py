@@ -1,10 +1,11 @@
 import numpy as np
-import scipy as sp
 from scipy import integrate, special
 
 from .function_fast import function_1d, function_2d
 
-## One-dimensional functions
+"""
+One-dimensional functions
+"""
 def linear(x, *p):
     """[summary]
     
@@ -139,7 +140,57 @@ def psf_1d(x, *p):
 
     return y + C
 
-## Two-dimensional functions
+def mott_shell_1d(r, *p):
+    """[summary]
+    
+    Arguments:
+        x {[type]} -- [description]
+    
+    Returns:
+        [type] -- [description]
+    """
+    T, mu0, r0 = p
+    
+    mu_local = np.array(mu0 - r**2/r0**2)
+
+    P_all = np.zeros(mu_local.shape)
+    Z = np.zeros(mu_local.shape)
+
+    n_max = 4
+    for n in range(n_max+1):
+        P = np.exp(n / T * (mu_local - (n-1)/2))
+        Z += P
+        P_all += n * P
+
+    return P_all /Z
+
+def mott_shell_mod_1d(r, *p):
+    """[summary]
+    
+    Arguments:
+        x {[type]} -- [description]
+    
+    Returns:
+        [type] -- [description]
+    """
+    T, mu0, r0 = p
+    
+    mu_local = np.array(mu0 - r**2/r0**2)
+
+    P_all = np.zeros(mu_local.shape)
+    Z = np.zeros(mu_local.shape)
+
+    n_max = 4
+    for n in range(n_max+1):
+        P = np.exp(n / T * (mu_local - (n-1)/2))
+        Z += P
+        P_all += np.mod(n, 2) * P
+
+    return P_all /Z
+
+"""
+Two-dimensional functions
+"""
 def gaussian_2d(xy_mesh, *p):
     """[summary]
     
@@ -297,3 +348,77 @@ def psf_2d_gaussian(xy_mesh, *p):
     # return A * np.exp(-r2/sigma**2) + C
 
     return function_2d.gaussian_iso(x, y, *p)
+
+def mott_shell_2d(xy_mesh, *p):
+    """[summary]
+    
+    Arguments:
+        xy_mesh {[type]} -- [description]
+    
+    Returns:
+        [type] -- [description]
+    """
+    T, mu0, r0, x0, y0, wx, wy, theta = p
+
+    # unpack 1D list into 2D x and y coords
+    (x, y) = xy_mesh
+
+    xc = x - x0
+    yc = y - y0
+
+    xr = xc * np.cos(theta) - yc * np.sin(theta)
+    yr = xc * np.sin(theta) + yc * np.cos(theta)
+
+    r = np.sqrt(xr**2/wx**2 + yr**2/wy**2) * np.sqrt(np.abs(wx * wy))
+
+    mu_local = np.array(mu0 - r**2/r0**2)
+
+    N = np.zeros(mu_local.shape)
+    Z = np.zeros(mu_local.shape)
+    S_loc = np.zeros(mu_local.shape)
+
+    for n in range(10):
+        P = np.exp(n / T * (mu_local - (n-1)/2))
+        N += n * P
+        S_loc += (n / T * (mu_local - (n-1)/2)) * P
+        Z += P
+
+    N *= 1 / Z
+    S_loc *= -1/Z
+    S_loc += np.log(Z)
+
+    return N, S_loc
+
+def mott_shell_mod_2d(xy_mesh, *p):
+    """[summary]
+    
+    Arguments:
+        xy_mesh {[type]} -- [description]
+    
+    Returns:
+        [type] -- [description]
+    """
+    T, mu0, r0, x0, y0, wx, wy, theta = p
+
+    # unpack 1D list into 2D x and y coords
+    (x, y) = xy_mesh
+
+    xc = x - x0
+    yc = y - y0
+
+    xr = xc * np.cos(theta) - yc * np.sin(theta)
+    yr = xc * np.sin(theta) + yc * np.cos(theta)
+
+    r = np.sqrt(xr**2/wx**2 + yr**2/wy**2) * np.sqrt(np.abs(wx * wy))
+
+    mu_local = np.array(mu0 - r**2/r0**2)
+
+    P_all = np.zeros(mu_local.shape)
+    Z = np.zeros(mu_local.shape)
+
+    for n in range(5):
+        P = np.exp(n / T * (mu_local - (n-1)/2))
+        Z += P
+        P_all += np.mod(n, 2) * P
+
+    return P_all /Z
