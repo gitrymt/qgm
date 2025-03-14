@@ -416,7 +416,7 @@ def mott_shell_mod_2d(xy_mesh, *p):
     P_all = np.zeros(mu_local.shape)
     Z = np.zeros(mu_local.shape)
 
-    for n in range(5):
+    for n in range(6):
         P = np.exp(n / T * (mu_local - (n-1)/2))
         Z += P
         P_all += np.mod(n, 2) * P

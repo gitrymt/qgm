@@ -57,7 +57,7 @@ def psf(x, y, *p):
     yc = y - y0
 
     r = np.sqrt(xc**2 + yc**2) * alpha
-    z = np.zeros(r.shape)
+    z = np.zeros(r.shape, dtype=np.float)
 
     (size1, size2) = r.shape
     r = np.ravel(r)

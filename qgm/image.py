@@ -8,7 +8,7 @@ import cv2
 
 import joblib
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.collections as mc
 
@@ -222,6 +222,7 @@ class image():
     def generate_psfm(self, psf_model=None):
         x0s = np.array(self.system.lattice['Lattice sites']['X Center'], dtype=float)
         y0s = np.array(self.system.lattice['Lattice sites']['Y Center'], dtype=float)
+
         psfm_size = np.array((self.xymesh_ROI[0].shape[0], self.xymesh_ROI[0].shape[1], x0s.size), dtype=np.uint16)
         
         if psf_model == None:
