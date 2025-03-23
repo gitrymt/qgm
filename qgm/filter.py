@@ -1,7 +1,9 @@
 import numpy as np
-import scipy as sp
 
 from . import image
+
+# import scipy as sp
+
 
 def lowpass(image: image, factor=1) -> []:
     # Sampling frequency
@@ -48,6 +50,7 @@ def lowpass(image: image, factor=1) -> []:
         print(fx.shape, im_width)
 
     return img_lowpass, img_fft, (fx, fy), (FX, FY)
-    
+
+
 def gaussian():
     pass

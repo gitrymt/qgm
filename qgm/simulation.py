@@ -1,13 +1,13 @@
-from tqdm import tqdm
-
 import numpy as np
+from tqdm import tqdm
 
 from . import function
 from .image import image
 from .parameter import system
 
+
 def generate_simulation_image(setting: system,
-                              img_size={'x':100, 'y':100, 'unit': 'px'}) -> image:
+                              img_size={'x': 100, 'y': 100, 'unit': 'px'}) -> image:
     img = image()
     img.system = setting
 
@@ -29,10 +29,10 @@ def generate_simulation_image(setting: system,
 
     dist = 'uniform'
     threshold = 0.5
-    
-    if dist is 'uniform':
+
+    if dist == 'uniform':
         pos_bool = np.random.rand(len(xs)) > threshold
-    elif dist is 'gauss':
+    elif dist == 'gauss':
         sigmax = 10
         sigmay = 10
         param_dist = [1, 0, sigmax, 0, sigmay, 0]
@@ -70,10 +70,10 @@ def generate_simulation_image(setting: system,
                 y_rnd = 2 * ymax * (np.random.rand(Nsample) - 0.5)
                 z_rnd = np.random.rand(Nsample)
                 s = function.psf_2d((x_rnd, y_rnd), *p_psf)
-                
+
                 xs_rnd = np.append(xs_rnd, x_rnd[s > z_rnd])
                 ys_rnd = np.append(ys_rnd, y_rnd[s > z_rnd])
-                
+
                 N = xs_rnd.size
 
             if N > Nphs[i]:
@@ -81,7 +81,7 @@ def generate_simulation_image(setting: system,
                 ys_rnd = ys_rnd[0:Nphs[i]]
 
                 N = xs_rnd.size
-            
+
             for j in range(len(xs_rnd)):
                 x_tmp1 = xy_mesh[0] >= xs_rnd[j]
                 x_tmp2 = xy_mesh[0] <= xs_rnd[j] + spx_eff
@@ -106,10 +106,10 @@ def generate_simulation_image(setting: system,
                 y_rnd = 50 * (np.random.rand(Nsample) - 0.5)
                 z_rnd = np.random.rand(Nsample)
                 s = function.psf_2d((x_rnd, y_rnd), *p_psf)
-                
+
                 xs_rnd = np.append(xs_rnd, x_rnd[s > z_rnd])
                 ys_rnd = np.append(ys_rnd, y_rnd[s > z_rnd])
-                
+
                 N = xs_rnd.size
 
             if N > Nphs[i]:
@@ -117,7 +117,7 @@ def generate_simulation_image(setting: system,
                 ys_rnd = ys_rnd[0:Nphs[i]]
 
                 N = xs_rnd.size
-            
+
             for j in range(len(xs_rnd)):
                 x_tmp1 = xy_mesh[0] >= xs_rnd[j]
                 x_tmp2 = xy_mesh[0] <= xs_rnd[j] + spx_eff
@@ -132,20 +132,21 @@ def generate_simulation_image(setting: system,
 
     Nbgs = np.random.poisson(photon_noise, img.image.shape)
     img.image += Nbgs
-    
+
     x_img = xy_mesh[0] - spx_eff/2
     y_img = xy_mesh[1] - spx_eff/2
-    
+
     return img, x_img, y_img, xs_ex, ys_ex, Nphs, Nbgs
     # return img
+
 
 def qgm_image_rnd(xs, ys,
                   Nsample=100000, threshold=0.5, dist='uniform', sigmax=10, sigmay=10, seed=None,
                   fast=False, show_progress=False):
-    
+
     if seed is not None:
         np.random.seed(seed)
-    
+
     # alpha_psf = 2 * np.pi * self._NA / self._wavelength
 
 #     nxmin = int(np.min(xs) / self._spx_eff) - 1
@@ -172,11 +173,11 @@ def qgm_image_rnd(xs, ys,
 #         pos_bool[np.random.rand(len(xs)) < threshold] = False
 #     else:
 #         pos_bool = np.random.rand(len(xs)) > threshold
-    
+
 #     xs_ex = xs[pos_bool]
 #     ys_ex = ys[pos_bool]
 #     Nex = len(xs_ex)
-    
+
 #     Nphs = np.random.poisson(self._photon, Nex)
 
 #     if show_progress:
@@ -192,10 +193,10 @@ def qgm_image_rnd(xs, ys,
 #                 y_rnd = 2 * ymax * (np.random.rand(Nsample) - 0.5)
 #                 z_rnd = np.random.rand(Nsample)
 #                 s = function.psf_2d((x_rnd, y_rnd), *p_psf)
-                
+
 #                 xs_rnd = np.append(xs_rnd, x_rnd[s > z_rnd])
 #                 ys_rnd = np.append(ys_rnd, y_rnd[s > z_rnd])
-                
+
 #                 N = xs_rnd.size
 
 #             if N > Nphs[i]:
@@ -203,7 +204,7 @@ def qgm_image_rnd(xs, ys,
 #                 ys_rnd = ys_rnd[0:Nphs[i]]
 
 #                 N = xs_rnd.size
-            
+
 #             for j in range(len(xs_rnd)):
 #                 x_tmp1 = x >= xs_rnd[j]
 #                 x_tmp2 = x <= xs_rnd[j] + self._spx_eff
@@ -228,10 +229,10 @@ def qgm_image_rnd(xs, ys,
 #                 y_rnd = 50 * (np.random.rand(Nsample) - 0.5)
 #                 z_rnd = np.random.rand(Nsample)
 #                 s = function.psf_2d((x_rnd, y_rnd), *p_psf)
-                
+
 #                 xs_rnd = np.append(xs_rnd, x_rnd[s > z_rnd])
 #                 ys_rnd = np.append(ys_rnd, y_rnd[s > z_rnd])
-                
+
 #                 N = xs_rnd.size
 
 #             if N > Nphs[i]:
@@ -239,7 +240,7 @@ def qgm_image_rnd(xs, ys,
 #                 ys_rnd = ys_rnd[0:Nphs[i]]
 
 #                 N = xs_rnd.size
-            
+
 #             for j in range(len(xs_rnd)):
 #                 x_tmp1 = x >= xs_rnd[j]
 #                 x_tmp2 = x <= xs_rnd[j] + self._spx_eff
@@ -254,12 +255,11 @@ def qgm_image_rnd(xs, ys,
 
 #     Nbgs = np.random.poisson(self._photon_noise, img.shape)
 #     img += Nbgs
-    
+
 #     x_img = x - self._spx_eff/2
 #     y_img = y - self._spx_eff/2
-    
-#     return img, x_img, y_img, xs_ex, ys_ex, Nphs, Nbgs
 
+#     return img, x_img, y_img, xs_ex, ys_ex, Nphs, Nbgs
 
 
 #########################################################################
@@ -286,11 +286,11 @@ def qgm_image_rnd(xs, ys,
 #                                 param1=p1_hough, param2=p2_hough,
 #                                 minRadius=rmin_hough, maxRadius=rmax_hough)
 #     circles = np.uint16(np.around(circles))
-    
+
 #     size_fit = int(3 * size_iso / 2)
 #     shape_fit = tuple(np.array([size_fit, size_fit]))
 #     shape = tuple(np.array([size_iso, size_iso]))
-    
+
 #     imgs_iso = np.zeros([size_fit, size_fit, circles.shape[1]])
 #     imgs_iso_fit = np.zeros([size_iso, size_iso, circles.shape[1]])
 
@@ -299,7 +299,7 @@ def qgm_image_rnd(xs, ys,
 #     x_iso = []
 #     y_iso = []
 #     r_iso = []
-    
+
 
 #     for (x, y, r) in circles[0]:
 #         # try:
@@ -307,18 +307,18 @@ def qgm_image_rnd(xs, ys,
 #         xmax_sub = x + size_fit / 2
 #         ymin_sub = y - size_fit / 2
 #         ymax_sub = y + size_fit / 2
-        
+
 #         matrix = [[1, 0, -xmin_sub], [0, 1, -ymin_sub]]
 #         affine_matrix_fit = np.float32(matrix)
 #         img_iso = cv2.warpAffine(img, affine_matrix_fit, shape_fit,
 #                                 flags=interpolation_method)
 #         imgs_iso[:, :, n_isolate] = img_iso
 #         img_iso_fit = gaussian_filter(img_iso, sigma=sigma_filter)
-        
+
 #         p_ini = [np.max(img_iso_fit)*0.9, size_fit/2, size_fit/2, 2 * np.pi * self._NA / (self._wavelength / self._spx_eff), np.min(img_iso_fit)]
 #         # p_fit = p_ini
 #         xy_fit = np.meshgrid(np.arange(size_fit), np.arange(size_fit))
-        
+
 #         try:
 #             p_fit, p_err, fit_goodness = fitting.fit_2d(function.psf_2d, img_iso_fit, xy_fit, p_ini)
 
@@ -335,7 +335,7 @@ def qgm_image_rnd(xs, ys,
 #             r_iso += [r]
 #         except:
 #             # imgs_iso[:, :, n_isolate] = 0
-            
+
 #             x_iso += [x]
 #             y_iso += [y]
 #             r_iso += [r]
@@ -344,17 +344,17 @@ def qgm_image_rnd(xs, ys,
 #         #     xmax_sub = x + size_iso / 2
 #         #     ymin_sub = y - size_iso / 2
 #         #     ymax_sub = y + size_iso / 2
-        
+
 #         #     shape = tuple(np.array([size_iso, size_iso]))
 #         #     matrix = [[1, 0, -xmin_sub], [0, 1, -ymin_sub]]
 #         #     affine_matrix = np.float32(matrix)
 #         #     imgs_iso[:, :, n_isolate] = cv2.warpAffine(img, affine_matrix, shape,
 #         #                                                flags=interpolation_method)
-        
+
 #         #     x_iso += [x]
 #         #     y_iso += [y]
 #         #     r_iso += [r]
-        
+
 #         n_isolate += 1
 
 #     # imgs_iso = imgs_iso[np.sum(imgs_iso, axis=2)>0]

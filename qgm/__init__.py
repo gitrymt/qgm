@@ -17,4 +17,5 @@ __all__ = ["data",
            "filter",
            "search_atoms",
            "deconvolution",
-          ]
+           "simulation",
+           ]

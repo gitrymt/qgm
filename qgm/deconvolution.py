@@ -1,9 +1,11 @@
 import copy
 
 import numpy as np
-import scipy as sp
 
 from . import image
+
+# import scipy as sp
+
 
 def deconvolution(image, Niter=100, method=''):
     # if (len(image.system.lattice['Lattice sites']['X Center']) == 0) or (len(image.system.lattice['Lattice sites']['Y Center']) == 0):
@@ -45,4 +47,3 @@ def deconvolution(image, Niter=100, method=''):
     image.system.lattice['Lattice sites']['Amplitude'] = np.ravel(factor_sites)
 
     return img_dec, factor_evol
-

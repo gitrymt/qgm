@@ -1,16 +1,15 @@
 import copy
 
-import numpy as np
-import scipy as sp
-from scipy.signal import find_peaks
-
-import pandas as pd
-
 import cv2
+import numpy as np
+import pandas as pd
 from PIL import Image
 
-from . import image, function, fitting
-from . import filter
+from . import filter, fitting, function, image
+
+# import scipy as sp
+# from scipy.signal import find_peaks
+
 
 def select_interporation(interporation, library):
     if library == 'OpenCV':
@@ -43,28 +42,25 @@ def select_interporation(interporation, library):
             interporation_method = Image.LANCZOS
     else:
         pass
-    
+
     return interporation_method
+
 
 def search_atoms(img, filter_factor=0.65,
                  psf_model='gaussian', psf_size=2*15+1,
                  fine_search=True, magnification_fine=11,
                  scaling=False):
     from astropy.stats import sigma_clipped_stats
-    from astropy.table import Table
-
+    # from astropy.table import Table
     # from photutils.datasets import make_100gaussians_image
     from photutils import find_peaks
 
     # from astropy.visualization import simple_norm
     # from astropy.visualization.mpl_normalize import ImageNormalize
     # from photutils import CircularAperture
-
     # from photutils.datasets import make_4gaussians_image
     # from photutils import centroid_com, centroid_1dg, centroid_2dg
-    
     # from time import time
-
     # t1_lowpass = time()
 
     img_lowpass = copy.deepcopy(img)
@@ -101,8 +97,7 @@ def search_atoms(img, filter_factor=0.65,
     else:
         print('Keyword error')
 
-
-    dL = int((psf_size-1)/2)
+    dL = int((psf_size-1) / 2)
     L = np.arange(-dL, dL+1, 1, dtype=float)
     interporation_method = Image.LANCZOS
 
@@ -124,7 +119,7 @@ def search_atoms(img, filter_factor=0.65,
 
     if fine_search:
         size_fine = psf_size * magnification_fine
-        
+
         XX_sub_fine = np.array(Image.fromarray(XX_sub).resize((size_fine, size_fine), resample=interporation_method))
         YY_sub_fine = np.array(Image.fromarray(YY_sub).resize((size_fine, size_fine), resample=interporation_method))
 
@@ -133,28 +128,28 @@ def search_atoms(img, filter_factor=0.65,
         for x0, y0 in (positions):
             img_sub = img_lowpass.image[y0-dL:y0+dL+1, x0-dL:x0+dL+1]
         #     img_sub = img.image[x0-15:x0+16, y0-15:y0+16]
-            
-            if img_sub.shape  == (psf_size, psf_size):
+
+            if img_sub.shape == (psf_size, psf_size):
                 p_ini = [np.max(img_sub) - np.min(img_sub), x0, y0, sigma_psf, np.min(img_sub)]
                 XYmesh_sub = (XX_sub + x0, YY_sub + y0)
-                
+
                 p_fit, p_err, fit_goodness = fitting.fit_2d(fit_func, img_sub, XYmesh_sub, p_ini)
-                
+
                 if fit_goodness > 0.9:
                     if scaling:
                         img_pil = Image.fromarray(img_sub / magnification_fine**2)
                     else:
                         img_pil = Image.fromarray(img_sub)
                     img_psf_resize = img_pil.resize((size_fine, size_fine), resample=Image.LANCZOS)
-                
+
                     XYmesh_sub_fine = (XX_sub_fine, YY_sub_fine)
-                    
+
                     p_ini = [np.max(img_sub) - np.min(img_sub), 0, 0, sigma_psf, np.min(img_sub)]
                     p_fit, p_err, fit_goodness = fitting.fit_2d(fit_func, np.array(img_psf_resize), XYmesh_sub_fine, p_ini)
                     NAeff = p_fit[3] * (psf_info['Wavelength (um)'] / system_info['Effective Pixel size (um/px)']) / (2 * np.pi)
 
                     # print(count, n, fit_goodness, NAeff)
-                    
+
                     x0s += [x0 + p_fit[1]]
                     y0s += [y0 + p_fit[2]]
                     goodnesses += [fit_goodness]
@@ -170,13 +165,13 @@ def search_atoms(img, filter_factor=0.65,
                         img_pil = Image.fromarray(img_sub)
 
                     img_psf_resize = img_pil.resize((size_fine, size_fine), resample=Image.LANCZOS)
-                    
+
                     img_shift = image.pixel_shift(np.array(img_psf_resize), -p_fit[1], -p_fit[2])
                     psf_mean += img_shift
                     psfs += [img_shift]
                     # psf_mean += image.pixel_shift(np.array(img_psf_resize), -p_fit[1], -p_fit[2])
                     # psfs += [image.pixel_shift(np.array(img_psf_resize), -p_fit[1], -p_fit[2])]
-                    
+
                     count += 1
 
             n += 1
@@ -188,20 +183,20 @@ def search_atoms(img, filter_factor=0.65,
         for x0, y0 in (positions):
             img_sub = img_lowpass.image[y0-dL:y0+dL+1, x0-dL:x0+dL+1]
         #     img_sub = img.image[x0-15:x0+16, y0-15:y0+16]
-            
-            if img_sub.shape  == (psf_size, psf_size):
+
+            if img_sub.shape == (psf_size, psf_size):
                 p_ini = [np.max(img_sub) - np.min(img_sub), x0, y0, sigma_psf, np.min(img_sub)]
                 XYmesh_sub = (XX_sub + x0, YY_sub + y0)
-                
+
                 p_fit, p_err, fit_goodness = fitting.fit_2d(fit_func, img_sub, XYmesh_sub, p_ini)
-                
-                if fit_goodness > 0.9:            
+
+                if fit_goodness > 0.9:
                     p_ini = [np.max(img_sub) - np.min(img_sub), 0, 0, sigma_psf, np.min(img_sub)]
                     p_fit, p_err, fit_goodness = fitting.fit_2d(fit_func, np.array(img_sub), XYmesh_sub, p_ini)
                     NAeff = p_fit[3] * (psf_info['Wavelength (um)'] / system_info['Effective Pixel size (um/px)']) / (2 * np.pi)
 
                     # print(count, n, fit_goodness, NAeff)
-                    
+
                     x0s += [x0 + p_fit[1]]
                     y0s += [y0 + p_fit[2]]
                     # x0s += [x0 - p_fit[1]]
@@ -214,7 +209,7 @@ def search_atoms(img, filter_factor=0.65,
 
                     img_sub = img.image[y0-dL:y0+dL+1, x0-dL:x0+dL+1]
                     psf_mean += image.pixel_shift(img_sub, -p_fit[1], -p_fit[2])
-                    
+
                     count += 1
 
             n += 1
