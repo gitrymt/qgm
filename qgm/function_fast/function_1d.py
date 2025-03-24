@@ -1,13 +1,14 @@
 import numpy as np
-from numba import jit, uint16, float64
+from numba import float64, jit, uint16
+
 
 @jit(cache=True)
-def gaussian(x:np.ndarray, *p:np.ndarray) -> np.ndarray:
+def gaussian(x: np.ndarray, *p: np.ndarray) -> np.ndarray:
     """[summary]
-    
+
     Arguments:
         x {[type]} -- [description]
-    
+
     Returns:
         [type] -- [description]
     """

@@ -1,14 +1,15 @@
 import numpy as np
-from scipy import integrate, special
 from numba import jit
+from scipy import integrate, special
+
 
 @jit(cache=True)
 def gaussian(x, y, *p):
     """[summary]
-    
+
     Arguments:
         xy_mesh {[type]} -- [description]
-    
+
     Returns:
         [type] -- [description]
     """
@@ -20,13 +21,14 @@ def gaussian(x, y, *p):
 
     return A * np.exp(-xc**2/sigmax**2 - yc**2/sigmay**2) + C
 
+
 @jit(cache=True)
 def gaussian_iso(x, y, *p):
     """[summary]
-    
+
     Arguments:
         xy_mesh {[type]} -- [description]
-    
+
     Returns:
         [type] -- [description]
     """
@@ -39,17 +41,18 @@ def gaussian_iso(x, y, *p):
 
     return A * np.exp(-r2/sigma**2) + C
 
+
 # @jit(cache=True)
 @jit
 def psf(x, y, *p):
     """[summary]
-    
+
     Arguments:
         xy_mesh {[type]} -- [description]
-    
+
     Returns:
         [type] -- [description]
-    """    
+    """
     # Parameters
     A, x0, y0, alpha, C = p
 
