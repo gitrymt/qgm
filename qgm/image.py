@@ -137,14 +137,20 @@ class image():
 
         if ROI_origins is not None:
             if len(ROI_origins) == 4:
-                x_min, x_max, y_min, y_max = ROI_origins
+                x_min_, x_max_, y_min_, y_max_ = ROI_origins
+
+                x_max = np.max([x_min_, x_max_])
+                x_min = np.min([x_min_, x_max_])
+                y_max = np.max([y_min_, y_max_])
+                y_min = np.min([y_min_, y_max_])
 
                 conditions = (x0_all <= x_max) * (x0_all >= x_min)
                 conditions *= (y0_all <= y_max) * (y0_all >= y_min)
 
-                if conditions.size >= 1:
-                    x0_all = x0_all[conditions]
-                    y0_all = y0_all[conditions]
+                assert int(np.sum(conditions)) >= 1, 'There is no origins within ROI'
+
+                x0_all = x0_all[conditions]
+                y0_all = y0_all[conditions]
 
         if origin == 'best':
             id_orig = np.argmax(self.system.lattice['Origins']['Goodness'])
