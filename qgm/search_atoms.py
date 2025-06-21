@@ -53,7 +53,7 @@ def search_atoms(img, filter_factor=0.65,
     from astropy.stats import sigma_clipped_stats
     # from astropy.table import Table
     # from photutils.datasets import make_100gaussians_image
-    from photutils import find_peaks
+    from photutils.detection import find_peaks
 
     # from astropy.visualization import simple_norm
     # from astropy.visualization.mpl_normalize import ImageNormalize
