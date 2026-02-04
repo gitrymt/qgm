@@ -31,9 +31,8 @@ def lattice_geometry_1d_define(Nsite=2*6+1):
         """
         A, sigmax, a1, x0, C = p
 
-        n = np.array([[i - (Nsite-1)/2] for i in range(Nsite)])
+        n = np.array([[i - (Nsite-1)/2] for i in range(Nsite)]).ravel()
         xs = n * a1 + x0
-
         y = np.zeros(x.shape)
 
         for n in range(xs.size):

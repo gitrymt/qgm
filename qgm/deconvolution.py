@@ -33,7 +33,7 @@ def deconvolution(image, Niter=100, method=''):
         img_err = np.multiply(img_comp, img_est_inv)
         site_err = PSFM_T * img_err
         factor_sites = np.multiply(factor_sites, site_err)
-        factor_sites[factor_sites < 0] = 0
+        factor_sites[factor_sites < 0] = 1e-12
 
         factor_evol[:, n+1] = factor_sites
 
