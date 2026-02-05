@@ -344,7 +344,7 @@ class image():
     def show_image(self):
         pass
 
-@jit(float64[:, :, :](uint16[:], float64[:, :], float64[:, :], float64[:], float64[:], float64[:]))
+@jit(float64[:, :, :](uint16[:], float64[:, :], float64[:, :], float64[:], float64[:], float64[:]), cache=True)
 def generate_gauss_psfm(size: np.ndarray, x: np.ndarray, y: np.ndarray,
                         x0s: np.ndarray, y0s: np.ndarray, sigmas: np.ndarray) -> np.ndarray:
     psfm = np.zeros((size[0], size[1], size[2]), dtype=np.float64)
